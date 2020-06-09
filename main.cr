@@ -35,10 +35,7 @@ dict.each do |key, hash|
   puts "#{key},#{hash}"
 end
 
-max_score = 0
-max_string = ""
-alpha = ('A'..'Z').to_a
-i = 0
+
 
 def string_to_2char(string : String) : Array(String)
   array = [] of String
@@ -106,17 +103,22 @@ STRING
 
 # pp char2_dict.to_a.sort_by {|k,v| v}.reverse.to_h
 # pp char_dict.to_a.sort_by {|k,v| v}.reverse.to_h
+max_score = 0
+max_score_total = 0
+max_string = ""
+alpha = ('A'..'Z').to_a
+i = 0
 
 matched_char_dict = Hash(Char, Int32).new
-miss_count = 0
-clear_count = 0
+miss_count = 0_i64
+clear_count = 0_i64
 # make_changed.each do |table|
 while true
   table = Hash(Char, Char).new
   original_table = ('A'..'Z').to_a
-  
+
   if matched_char_dict.size > 0
-    matched_char_dict.each do |k,v|
+    matched_char_dict.each do |k, v|
       original_table.delete k.upcase
       table[k.upcase] = k
     end
@@ -126,8 +128,6 @@ while true
   original_table.each_index do |i|
     table[original_table[i]] = shuffled_table[i].downcase
   end
-
-  
 
   string = <<-STRING
 JXD FVHJX OZFY MFY JXD WQF
@@ -147,7 +147,7 @@ WMZY JXD WQF, \"Z BZJ JXD YMC. JXHVQLX LDFJBDFDWW Z LVJ NC OMC.\"
 STRING
   score = 0
 
-  table.each do |k,v|
+  table.each do |k, v|
     string = string.gsub k, v
   end
 
@@ -157,29 +157,33 @@ STRING
       word.chars.each do |char|
         matched_char_dict[char] = 0
       end
-    end 
+    end
   end
 
   if score > max_score
     max_string = string
     max_score = score
-    miss_count -= 100000
-    puts "====== MAX START ======"
-    puts string
-    puts score
-    puts matched_char_dict
-    puts table
-    puts "====== MAX END ====="
+    miss_count -= score ** 2
+    if score > max_score_total
+      max_score_total = score
+      miss_count -= score ** 3
+      puts "====== MAX START ======"
+      puts string
+      puts score
+      puts matched_char_dict
+      puts table
+      puts "====== MAX END ====="
+    end
   else
     miss_count += 1
-    if miss_count > 1000
+    if miss_count > 10
+      max_score = 0
       matched_char_dict = matched_char_dict.clear
       miss_count = 0
       clear_count += 1
       print "#{clear_count} times cleard. \r"
     end
   end
-
 end
 
 puts max_score
